@@ -1,0 +1,6 @@
+@import "tailwindcss/preflight";
+@tailwind utilities;
+
+html {
+  @apply dark:bg-gray-900 dark:text-white;
+}
