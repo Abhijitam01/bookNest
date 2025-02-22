@@ -2,10 +2,12 @@ import express, { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/user";
-import checkAuth from "../middlewares/authMiddleware";
+import authMiddleware from "../middlewares/authMiddleware";
 
 const router = express.Router();
-
+interface AuthRequest extends Request {
+  user: { _id: string; email: string };
+}
 // Register
 router.post("/register", async (req: Request, res: Response) => {
   try {
@@ -73,13 +75,18 @@ router.post("/login", async (req: Request, res: Response) => {
 });
 
 // Get user profile
-router.get("/profile", checkAuth, async (req: Request, res: Response) => {
+router.get("/profile", authMiddleware, async (req: Request, res: Response) => {
   try {
-    const user = await User.findById(req.user?._id).select("-password");
-    if (!user) {
+    // Explicitly cast req to AuthRequest
+    const { user } = req as AuthRequest;
+
+    const foundUser = await User.findById(user._id).select("-password");
+
+    if (!foundUser) {
       return res.status(404).json({ error: "User not found" });
     }
-    res.json(user);
+
+    res.json(foundUser);
   } catch (error) {
     res.status(500).json({ error: "Error fetching profile" });
   }

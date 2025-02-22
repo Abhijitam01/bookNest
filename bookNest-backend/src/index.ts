@@ -3,10 +3,9 @@ import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 import bookRoutes from "./routes/books";
-// import userRoutes from "./routes/users"; // Comment this out for now if you want
+import userRoutes from "./routes/users"; 
 
 dotenv.config();
-
 const app = express();
 app.use(cors());
 app.use(express.json());
