@@ -20,7 +20,7 @@ app.use("/api/books", bookRoutes);
 
 // MongoDB connection
 const MONGODB_URI =
-  process.env.MONGODB_URI || "mongodb+srv://abhijitam:yY9PI6KA3S2eXLGL@cluster0.wszla.mongodb.net/booknest";
+  process.env.MONGODB_URI ;
 mongoose
   .connect(MONGODB_URI)
   .then(() => console.log("Connected to MongoDB"))
