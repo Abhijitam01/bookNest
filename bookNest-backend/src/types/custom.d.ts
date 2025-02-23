@@ -1,4 +1,4 @@
-import { Request } from 'express';
+import { Request } from "express";
 
 export interface AuthRequest extends Request {
   user: {
@@ -8,13 +8,9 @@ export interface AuthRequest extends Request {
   file?: Express.Multer.File;
 }
 
-declare global {
-  namespace Express {
-    interface Request {
-      user?: {
-        _id: string;
-        email: string;
-      };
-    }
-  }
+export interface AuthRequest extends Request {
+  user: {
+    _id: string;
+    email: string;
+  };
 } 

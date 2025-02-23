@@ -26,7 +26,7 @@ const storage = new CloudinaryStorage({
     folder: "book-images",
     allowed_formats: ["jpg", "jpeg", "png", "gif"],
     transformation: [{ width: 500, height: 500, crop: "limit" }],
-  },
+  } as any,
 });
 
 const upload = multer({
@@ -84,64 +84,60 @@ router.get("/:id", async (req: Request, res: Response) => {
 });
 
 // Add a note to a book
-router.post(
-  "/:id/notes",
-  authMiddleware,
-  async (req: AuthRequest, res: Response) => {
-    try {
-      const { note } = req.body;
-      if (!note) {
-        return res.status(400).json({ error: "Note content is required" });
-      }
+router.post("/:id/notes", authMiddleware, async (req, res: Response) => {
+  const { user } = req as AuthRequest;
 
-      const book = await Book.findById(req.params.id);
-      if (!book) {
-        return res.status(404).json({ error: "Book not found" });
-      }
-
-      book.notes.push({
-        text: note,
-        createdAt: new Date(),
-      });
-
-      await book.save();
-      res.json({ notes: book.notes });
-    } catch (error) {
-      res.status(500).json({ error: "Failed to add note" });
+  try {
+    const { note } = req.body;
+    if (!note) {
+      return res.status(400).json({ error: "Note content is required" });
     }
+
+    const book = await Book.findById(req.params.id);
+    if (!book) {
+      return res.status(404).json({ error: "Book not found" });
+    }
+
+    book.notes.push({
+      text: note,
+      createdAt: new Date(),
+    });
+
+    await book.save();
+    res.json({ notes: book.notes });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to add note" });
   }
-);
+});
 
 // Add a bookmark to a book
-router.post(
-  "/:id/bookmark",
-  authMiddleware,
-  async (req: AuthRequest, res: Response) => {
-    try {
-      const { page } = req.body;
-      if (!page) {
-        return res.status(400).json({ error: "Page number is required" });
-      }
+router.post("/:id/bookmark", authMiddleware, async (req, res: Response) => {
+  const { user } = req as AuthRequest;
 
-      const book = await Book.findById(req.params.id);
-      if (!book) {
-        return res.status(404).json({ error: "Book not found" });
-      }
-
-      if (!book.bookmarks.some((bookmark) => bookmark.page === page)) {
-        book.bookmarks.push({
-          page,
-          createdAt: new Date(),
-        });
-        await book.save();
-      }
-
-      res.json({ bookmarks: book.bookmarks });
-    } catch (error) {
-      res.status(500).json({ error: "Failed to add bookmark" });
+  try {
+    const { page } = req.body;
+    if (!page) {
+      return res.status(400).json({ error: "Page number is required" });
     }
+
+    const book = await Book.findById(req.params.id);
+    if (!book) {
+      return res.status(404).json({ error: "Book not found" });
+    }
+
+    if (!book.bookmarks.some((bookmark) => bookmark.page === page)) {
+      book.bookmarks.push({
+        page,
+        createdAt: new Date(),
+      });
+      await book.save();
+    }
+
+    res.json({ bookmarks: book.bookmarks });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to add bookmark" });
   }
-);
+});
 
 // Upload image URL
 router.post(
@@ -174,46 +170,44 @@ router.post(
   "/:id/upload",
   authMiddleware,
   upload.single("image"),
-  async (req: AuthRequest, res: Response) => { 
-      try {
-          const book = await Book.findById(req.params.id);
-          if (!book) {
-              return res.status(404).json({ error: "Book not found" });
-          }
-
-          if (!req.file) {
-              return res.status(400).json({ error: "No image file uploaded" });
-          }
-
-          book.images.push({
-              url: req.file.path,
-              createdAt: new Date(),
-          });
-
-          await book.save();
-          res.json(book);
-      } catch (error) {
-          res.status(500).json({ error: "Failed to upload image" });
+  async (req, res: Response) => {
+    const { user } = req as AuthRequest;
+    try {
+      const book = await Book.findById(req.params.id);
+      if (!book) {
+        return res.status(404).json({ error: "Book not found" });
       }
+
+      if (!req.file) {
+        return res.status(400).json({ error: "No image file uploaded" });
+      }
+
+      book.images.push({
+        url: req.file.path,
+        createdAt: new Date(),
+      });
+
+      await book.save();
+      res.json(book);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to upload image" });
+    }
   }
 );
 
 // Delete a book
-router.delete(
-  "/:id",
-  authMiddleware,
-  async (req: AuthRequest, res: Response) => {
-    try {
-      const book = await Book.findByIdAndDelete(req.params.id);
-      if (!book) {
-        return res.status(404).json({ error: "Book not found" });
-      }
-      res.json({ message: "Book deleted successfully" });
-    } catch (error) {
-      res.status(500).json({ error: "Failed to delete book" });
+router.delete("/:id", authMiddleware, async (req, res: Response) => {
+  const { user } = req as AuthRequest;
+  try {
+    const book = await Book.findByIdAndDelete(req.params.id);
+    if (!book) {
+      return res.status(404).json({ error: "Book not found" });
     }
+    res.json({ message: "Book deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete book" });
   }
-);
+});
 
 // Search for books
 router.get("/search", async (req: Request, res: Response) => {
@@ -255,7 +249,8 @@ router.get("/:id/comments", async (req: Request, res: Response) => {
 router.post(
   "/:id/comments",
   authMiddleware,
-  async (req: AuthRequest, res: Response ) => {
+  async (req, res: Response) => {
+    const { user } = req as AuthRequest;
     try {
       const { text } = req.body;
       if (!text) {
@@ -264,7 +259,7 @@ router.post(
 
       const comment = {
         text,
-        user: req.user._id,
+        user: user._id,
         createdAt: new Date(),
       };
 

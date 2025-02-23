@@ -1,11 +1,16 @@
+import * as dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-import dotenv from "dotenv";
+
+import connectDB from "./config/db";
 import bookRoutes from "./routes/books";
 import userRoutes from "./routes/users"; 
 
 dotenv.config();
+console.log("MONGODB_URI:", process.env.MONGODB_URI);
+
+connectDB();
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -15,7 +20,7 @@ app.use("/api/books", bookRoutes);
 
 // MongoDB connection
 const MONGODB_URI =
-  process.env.MONGODB_URI || "mongodb://localhost:27017/booknest";
+  process.env.MONGODB_URI || "mongodb+srv://abhijitam:yY9PI6KA3S2eXLGL@cluster0.wszla.mongodb.net/booknest";
 mongoose
   .connect(MONGODB_URI)
   .then(() => console.log("Connected to MongoDB"))
